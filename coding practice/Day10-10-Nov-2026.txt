@@ -1,0 +1,135 @@
+Day 10 — Advanced K8s, Jenkins and GitLab CI
+
+--> Ansible — create docker containers for multiple apps
+
+```yaml
+
+- name: setup docker container for multiple apps
+  hosts: all
+  become: yes
+  tasks:
+    - name: pull web app image
+      docker_image:
+        name: demo-app
+        source: pull
+    
+	- name: pull db app image
+      docker_image:
+        name: demo-db-app
+        source: pull
+		
+	- name: run web app container
+	  docker_container:
+		name: web-app
+		image: demo-app
+		state: started
+		published_ports:
+			- "8080:80"
+		
+	- name: run db app container
+	  docker_container:
+		name: db-app
+		image: demo-db-app
+		state: started
+		published_ports:
+			- "3306:3306"
+		
+--> Terraform — VPC with private & public subnets
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_subnet" "public" {
+  vpc_id = aws_vpc.main.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+--> K8s — Deploying statefulSet
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pathnex-db
+spec:
+  serviceName: "pathnex-db"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pathnex-db
+  template:
+    metadata:
+      labels:
+        app: pathnex-db
+    spec:
+      containers:
+        - name: db
+          image: mysql:5.7
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+			  name: mysql-storage
+	
+	volumeClaimTemplates:
+		- metadata:
+			- name: mysql-storage
+		  spec:
+			accessModes: ["ReadWriteOnce"]
+			resources:
+				requests:
+					storage: 1Gi
+					
+--> Jenkinsfile — Build and deploy to K8s
+
+pipeline {
+    agent any
+    environment {
+		IMAGE_NAME = 'pathnex-web-app'
+	}
+	stages {
+		stage('Build docker image') {
+		steps {
+			script {
+				docker.build("${env.IMAGE_NAME}")
+			}
+		}
+	}
+	stage('Push docker image'){
+		steps {
+			script {
+				docker.withRegistry('https://docker.io', 'docker-creds')
+				docker.image("${env.IMAGE_NAME}").push('latest')
+			}
+		}
+	}
+	stage('Deploy to K8s') {
+		steps {
+			script {
+				sh 'kubectl apply -f deployment.yaml'
+			}
+		}
+	}
+}	
+
+--> GitLab CI/CD — Deploy to Kubernetes
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl apply -f kubernetes/deployment.yaml
+
+
+
+--> Docker
+
+# Working directory & copy
+FROM ubuntu:22.04
+WORKDIR /opt/pathnex/devops-project
+COPY . /opt/pathnex/devops-project/
+CMD ["ls", "-l", "/opt/pathnex/devops-project"]
+
+# Real Path
+/opt/pathnex/devops-project
