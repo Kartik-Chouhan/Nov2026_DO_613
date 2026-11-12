@@ -1,0 +1,548 @@
+Cloud:- It is basically a cloud infra where we can host and deploy our apps, websites, files etc. Here, we can take the infra virtually on rent.
+Cloud will consume less infra as compare to on premise infra. 
+
+VPN: Virtual private network. It is like a private network which will behave like an isolated network from the other networks.
+
+On Premise                                                   V/s                  Cloud
+
+On premise is a physical infra inside any company             |        It is a virtual infra hosted on any cloud service(AWS, GCP etc).
+It can be accessible through VPN or company network only.     |        It doesn't require VPN. 
+It is owned and managed by any company			              |        It is managed and owned by cloud service provider.
+the investment is usually high to setup		                  |        Here, the investment is low as compared to on premise
+The availability depends on company infra and design. 	      |        Here, the availability is more. as it is available in multiple zones and locations.
+
+
+***Points to Remember***
+
+1. As of October 2026, AWS offers more than 220 cloud services and capabilities. but these services can vary based on regions.
+2. Landing Zone: It is a ready made and secure environment provided by AWS to start with AWS services in an organization. It creates a proper AWS 
+account structure for different teams, projects etc. It organizes the resources like security, networking and logging. It helps maintain the 
+security and structure of different AWS accounts. It comes under the AWS control tower.
+
+3. In cloud computing, Region and Availability Zone (AZ) describe where cloud infrastructure is physically located.
+--> Region: A Region is a separate geographical area where a cloud provider operates its data centers.(e.g. AWS has regions in Mumbai(ap-south-1), 
+Stockholm(ap-north-1) etc.). All the global services will be visible in "us-east-1".
+--> Availability Zone: An Availability Zone (AZ) is an isolated group of data centers within a Region. Each Region contains multiple Availability 
+Zones, designed to provide fault isolation and high availability. The AZ can be termed as ap-south-1a, ap-south-1b etc. The AZ can be placed within a
+separation range of 100km. All the AZs are connected by optical fibre cable.
+
+To remember, we can say.. a region is just like a city. and availability zones are like the different locations/areas within that city.
+
+4. AWS Control Tower: It is a service provided to manage landing zones and to secure and well governed multi account AWS environment automatically. 
+It helps to manage the landing zone.
+
+5. To remember, landing zone is what we've build. While, control tower is how we can manage it.
+
+6. EC2(Elastice Compute Cloud): This is one of the core services in AWS. The highest billing service is EC2. It is a service in AWS using which we
+can get virtual servers on rent. You can access that server remotely using SSH or PuTTY. AWS commonly charges per second for this virtual servers. It
+provides customizable configurations(CPU,memory, storage, networking).
+
+Q) What issue you've worked in K8s and how you resolved/troubleshoot it?
+Ans. There was an application and after deploying it, it was running fine but was not accessible through UI. So after troubleshooting I found that the 
+issue was of istio ingress and virtual services which were not configured. So i implemented the ingress routing to resolve it.
+
+--> Suppose, we've a file placed in a EC2 server and we want to create multiple copies of that file then whenever we've to update any content or line
+then we've to update in all the copies of that file which we call as soft or hard link in ec2.
+
+***Cmds to connect to EC2***
+
+cmd to connect to EC2: ssh -i key_pair_name ec2-user@public_ipv4
+cat /etc/passwd: to check all the users created in linux
+sudo useradd "username": cmd to create a new user 
+sudo passwd username: cmd to create or set the password for a user
+su username: cmd to switch the user, if want to go to ec2-user again then run "exit" cmd
+
+
+It has flexible pricing models: On-demand(As per the usage), Reserved(for any fixed period like 1,3 or 5 yrs etc), On-spot(can be rolled back by AWS when not in use).
+
+For e.g. cab service:
+
+On-demand: This is like we've booked ola, uber and used the service on-demand.
+Reserved: This is like i've reserved the cab for whole day or week or month. (Whether it is getting used or not).
+On-Spot: Imagine a cab company offering a very cheap ride when its cars are sitting idle during off season. The company may take the car back 
+when demand rises, so your ride isn't guaranteed to continue.
+
+7. IAM (Identity & Access Management): The purpose of this service is to provide security. Like who can access which resources and what actions
+they can perform. It is a secure a management of access to AWS resources. It is a global service.
+
+--> In IAM, we can create users, groups, roles and policies to control the accessibility.
+--> It supports MFA(Multi-factor authentication).
+--> It centrally manages and audits the user activities. 
+--> There are around 475 policies are there in IAM.
+--> Enable MFA for human users, especially privileged users.
+--> Always follow the principle of least privilege.
+--> Avoid using the AWS root user for everyday work.
+--> ARN: (Amazon Resource Name): This is the name give to any resource to uniquely identify it. The syntax of ARN is:
+		-- arn:partition:service:region:account-id:resource_name
+		
+8. SCP(Service Control Policy): It defines the maximum permissions available to IAM users and roles in the member accounts of an organization.	
+
+		--> IAM defines what a user or a role is allowed to do. 
+		--> It sets the outer boundary of what permissions can be available in an AWS account.
+		--> To remember, we can say like SCP is an organization level policy whereas IAM roles are user spescific permissions.
+
+9. VPC(Virtual Private Cloud): It's an isolated virtual network in cloud(AWS) where you can launch and manage resources such as EC2 instances. 
+Think of a VPC as your own private network in the cloud. Here, you can control its IP address range, subnets, routing, and network access rules.
+Main components of VPC are:
+						1. Public subnet: This is a internet accessible resource like frontend. It can be accessed directly.
+						2. Private subnet: This can't be access directly using internet.
+						3. Route table: Route table directs the traffic for public and private subnet.
+						4. Internet Gateway(IGW): It allows the communication b/w internet and VPC through routing table. 
+												  It is designed specifically for a VPC level component.
+						5. NAT gateway(Network Address Translation): It allows resources in a private subnet, such as an EC2 instance. Means the 
+																	 private subnet will access the public subnet through NAT gateway. 
+																	 It is designed for specific AZ.
+								--> In NAT gateway, the route is defined to internet gateway and from internet internet gateway the route will
+									be defined to internet. NAT gateway is for private gateway.
+						
+	--> usually, to deploy the application, we can use the public subnet for web servers and private subnet for DB.
+	
+10. S3(Simple Storage Service): It is a scalable object storage service provided in a cloud. It can be used to store files, images, docs and large
+								amount of data. It is a regional service means created in region specific.
+								--> We can say the S3 iss similar to Google Drive, but designed for applications, backups, logs, images, documents etc.
+								--> Virtually unlimited, durable and cost-effective.
+								--> S3 has multiple storage classes - S3 Standard, S3-Standard IA, S3-Intelligent-Tiering, S3-Glacier
+								--> S3-Standard for frequently accessed data. S3-Standard IA is for infrequently accessed data.
+								--> S3 glacier is for long term storage where data is rarely accessed.
+								--> the billing of S3 storage depends on which class we are using also how much data is stored.
+								--> It has bucket with unique name. It must be b/w 3 and 63 characters.
+								--> Even we can host a website in S3.
+								--> S3 provides in built security/encryption for storage.
+								--> Interview Ques: How to secure S3 bucket?  -- We will not allow or block the public access during the configuration of S3.
+								
+11. Session Manager: It is used to secure shell access to EC2 instances without needing SSH/RDP. Basically used to connect the EC2 instance thorugh
+					 the console without SSH/RDP.
+					--> It can be used for logging purpose and for monitoring purpose.
+					--> No port is required to connect EC2.
+					--> Using session manager, it can avoid the bastion hosts setup. 
+					--> Bastion Hosts means simply a jump server which is a secured configured server to access EC2.
+					--> No need for public IP address.
+					
+12. Route 53: It is highly available DNS service provided by AWS. It is used to convert the domain name into the IP address that computers can 
+			  connect to servers. It is a global service.
+			  --> Route 53 helps users access websites using domain names instead of IP addresses.
+			  --> It can configured through routing policies like weighted, latency-based and geolocation. Some IMP policy types are:
+				  AA - it maps to IPV4 domain name
+				  AAAA - maps to IPV6 domain name
+				  CNAME	- Maps one domain name to another domain name
+				  TXT - Stores text values used for verification and email security
+				  SOA - Contains administrative information about a DNS zone.(Start Of Autority)
+			  --> Weighted: If we want to transfer the traffic based on percentage/weight like X% on one server and Y% on another server. It will be used
+							for Blue/Green development.
+			  --> Latency-based: It will send the traffic to the fastest available region with low latency.
+			  --> Geolocation: Here, rouuting will be done on the basis of user's location. 
+			  --> It offers fast resolution for DNS routing.
+			  --> To configure and use the Route 53, we've to setup the "hosted zone" first. 
+			  --> Hosted zone is a container that holds information about the routing of traffic for your domain.4
+			  
+13. Cloud Trail: This service is used to monitor and record the API calls for auditing. This is a global service.
+				--> It tracks the changes made to the resource as well as user activities.
+				--> In cloud trail, logs are created and stored in S3 for security.
+				--> Using cloud trail, in history we can see the actions taken by user.
+				
+14. Cloud Watch: This service is used for monitoring & observation purpose. Using this service, we can monitor application, resources, CPU,
+				 performance etc.
+				--> We can think like cloud watch as a monitoring dashboard for our AWS infra.
+				--> We can configure alarms or alerts in cloud watch.
+				--> We can create different dashboards to collect different types of metrics.
+
+15. Auto Scaling: This service means a resource can automatically scale up and down itself as per the requirement and traffic.
+				--> It ensure HA and cost-effeciency of apps.
+				--> It works with ELB(Elastic Load Balancer) to balance the traffic.
+				
+16. EKS(Elastic Kubernetes Service): Amazon EKS is a managed Kubernetes service from AWS that helps you deploy, manage, and scale containerized applications without 
+		                             having to manage the Kubernetes control plane(master node) yourself.
+	
+17. Lambda: It is a serverless compute service that runs your code in response to events without requiring you to manage servers.
+			--> Here, the default timeout is 3 sec & max timeout is 15 min & min timeout is 1 sec.
+			--> If your code needs the lambda needs to run more than 15 min then consider the other services like ECS. AWS Batch depending on the 
+				work load.
+			--> It is a FAAS(Function as a service)
+			--> It is ideal for microservices architecture and event-driven architecture.
+			
+18. AWS Shield: This service is a managed DDoS(Distributed Denial of Service) which helps to secure and provide protection to your apps which are
+				running on AWS from the phishing attacks. This is a regionjal service. 
+				--> Simple, it is a DDoS protection for the apps.
+				--> DDoS means a flood of traffic just to attempt the attack on your app.
+				--> Two types are there for AWS shield, Shield Standard & Shield Advanced.
+				--> It helps mitigate the large-scale attack without affecting performance.
+				
+19. AWS WAF(Web Application Firewall): This service helps protect websites and web applications by filtering incoming HTTP and HTTPS requests 
+									   using configurable rules. This is a regional service.
+									   --> Think of it as a security guard checking every web request before it reaches your application.
+									   --> Here, we can customize the WAF rules.
+									   --> This service can prevent from attacks like SQL injection and CSS(Cross site scripting)
+									   --> CSS(Cross site scripting): Here, the attacker will attempt to inject malicious scripts into web inputs.
+									   --> Most oftenly, we create WAF on cloudfront.
+						
+20. AWS Guardduty: This service will detect the threats for AWS environment.
+				   --> It will continuously monitor your AWS account for suspicious activities.
+				   --> It can be integrated with cloud watch for automatic response actions.
+				   --> It can help to identify unauthorized access.
+				   
+21. AWS Inspector: This is an automated vulnerability smanagement service. This is a regional service
+				   --> It will continuously monitor and scan the AWS workloads(EC2, lambda).
+				   --> Provides detailed information about the vulnerabilities and their severity level.
+				   --> CVEs(Common Vulnerability Exposures).
+				   --> CVSS(Common Vulnerability Scoring System). Scores from 0.0 to 10.0
+				   --> A CVEs is how much impacting the app can be checked in CVSS.
+
+22. AWS KMS(Key Management Service): This service can be used to create and manage the encryption key for securing the data.
+				   --> Two types of encryption keys: Symmetric(1 key only) & Asymmetric(2 keys: public + private)
+				   --> Automatic key rotation service when you're changing password after a period of time.
+				   --> Keys will be stored in "parameter store".
+
+23. AWS System Manager(SSM):This helps you manage, access, automate, and troubleshoot EC2 instances and other supported resources without 
+						 manually connecting to every server.
+						 --> To remember, It's a central control panel for managing your servers.
+
+24. AWS Cloudfront: This is a content Delivery Network (CDN) that delivers website content, images, videos, APIs, and other files to users with 
+					low latency and high transfer speeds.
+					low latency and high transfer speeds.
+					--> It supports both dynamic and static content.
+					--> It can be integrated with EC2 and S3.	 
+					--> Supports secure delivery using TLS certificates.
+					--> To enhance security, you can integrate AWS shield(DDoS), WAF.
+					
+25. AWS Snowball: It's an AWS data transfer service that uses secure physical devices to move large amounts of data between your location and AWS, 
+				  especially when transferring data over the internet would take too long or be impractical.
+				  --> It is very useful especially for large amounts of data.
+				  --> In simple, it is a data transfer service applicable and useful where internet is not feasible.
+				  
+26. AWS RDS: It's a managed relational db service using whcih you can setup, manage, operate and scale a DB in AWS.
+				--> Here, it can scale automatically as per the need so you don't have to worry about the infra or server.
+				--> It can automatic the backup and failover service.
+				--> Provides scalability and high availability through multiple Azs & read replica.
+				--> It offers encryption for DB.
+				--> It supports oracle, SQL, MariaBD, PostreSQL, MySQL.
+
+27. AWS Aurora: This is also a relational db service which can provide high availability and scalability but it supports only MySQL & PostreSQL.
+				--> The main diff b/w RDS & Aurora is that Aurora is MySQL compaitible.
+				
+28. AWS DynamoDB: This is a fully managed NoSQL and serverless DB service.
+				--> It provides high performance and faster query operations.
+				--> It can automatically scales as per the requirement.
+				--> It stores data as attributes(field) and items.
+				--> We can use DynamoDB, where the fast execution of queries is needed.
+				--> It supports key-value access of DB.
+
+29. AWS Redshift: Amazon Redshift is a fully managed, petabyte-scale cloud data warehouse service designed for analytics and reporting purpose. 
+				  It helps organizations to analyze large volumes of data using SQL.
+				--> It can be used to offer encryption for data security.
+				--> It provides parallel query processing.
+				
+30. AWS EMR: It means "Elastic Map Reduce", It is a service for processing and analyzing large datasets using big-data frameworks such as Apache Spark, 
+				Hadoop, and Hive.
+
+31. AWS Glue: This is a serverless service which can be used to perform ETL operations/service in AWS where most of the operations can be handled by AWS.
+
+32. AWS DMS(Data Migration Service): This service will help you to migrate data from one source DB to target DB.
+									--> If we want to move or migrate data from on-premise to AWS RDS, we can use DMS.
+									--> Replicating ongoing database changes to a target.
+									--> CDC (Change Data Capture): Captures ongoing changes made to the source and applies them to the target.
+									
+33. AWS Batch: This service can be used to run batch processing workloads at scale. It is a container based job.
+			   --> It provides the resources automatically for batch jobs.
+			   --> It handles thousands of batch computing jobs.
+			   --> Here, if we want to create a job, first we need to create a job definition.
+			   
+34. AWS EFS(Elastic File System): It's a fully managed, elastic file storage service. It allows multiple EC2 instances to access the same shared files 
+								concurrently.
+				--> It is fully manage with auto-scaling.
+				--> It supports NFS(Network File System) protocols.
+				--> It provides encryption service.
+				--> Ideal for use cases like content management and big data analytics.
+				
+35. AWS Elastic Beanstalk: It's a Paas(Platform as a service) for deploying and managing apps. 
+				--> It supports multiple programming languages.
+				--> Automatically handles deployment, scaling and monitoring.
+				
+36. AWS CodePipeline: It is a continuous integration and delivery service for automated software workflows. 
+				--> It is a CI/CD service in AWS.
+				--> It automates the build, test and deployment process of apps.
+				--> It can be integrated with Github, CodeCommit and other control repos.
+				--> Support easy and flexible pipeline configuration.
+
+37. AWS CodeBuild: It is to manage builed service to compile source code and run tests. In simple, CodeBuild is a service to compile source code and run tests.
+
+38. AWS CodeDeploy: It will automate the code deployments to EC2 instances and on-premises servers.
+				--> Deployment Strategies:
+					1. Blue green
+					2. Rolling
+					3. Canary
+				
+				
+39. AWS X-Ray: It is a AWS provided tracing service for debugging and analyzing microservices apps.
+	
+***(IMP)--7 R's in Migration***
+
+Rehost, Replatform, Repurchase, Refactor, Retire, Retain, Relocate.	
+
+****DOCKER****
+
+When we say docker in AWS, it means we're referring to docker containers. Docker is a service which will containerize the application. AWS provides
+docker to auto scale, manage, and run those containers. For any application, Docker can package your application, and AWS can run it without 
+requiring you to manage every part of the infrastructure yourself. Docker contains everything needs to run an application like code, libraries, 
+dependencies and system tools.
+
+Some main terms and services that are used with Docker:
+
+1. AWS ECR: (Elastic Container Registry) - It is a managed registry for storing Docker container images.
+
+2. AWS ECS: (Elastic Container Service) - It will manage the containers in AWS. We can just "fargate" to run the containers without managing the servers.
+
+3. Docker Image: Docker image is a read only package containing everything which is required to run an application. Like app code, dependencies and 
+				 other configuration. Think of a docker image as a template from which you create and run docker containers.
+
+4. Docker File: A docker file is a script that contains a series of instructions on how to build a docker image. Instructions like how to create image,
+				which base image to use, how to install dependencies, what commands to run when the container starts. Some imp base files are:
+				
+				i) Alpine
+				ii) Ubuntu
+				iii) 369
+
+5. Docker Engine: A docker engine is the core component of docker service which allows you to create, start, stop, manage the docker containers and
+				  images.
+
+6. Docker Daemon: It is the background service that manages containers, images, networks, and storage volumns.
+				  "Docker-d" is one of the popular docker daemon. but, now a days "Container-d" is getting used.
+				  
+7. Docker Compose: It is a tool for defining and running multi-container docker applications, with a simple YAML file. Here, It can configure
+				   multi-service containers like container for web app and db etc. We can interact to docker daemon through docker CLI.
+				 
+8. Docker Registry: A docker registry is the place where docker images are stored, managed, and can be downloaded. "Docker Hub" is the most popular
+					public registry. We can say like it is a git repo for the docker images. Nexus, Jfrog are the e.g of docker registry.
+					
+9. Docker Networking: It allows the containers to communicate with each other. Also, to the external networks.
+					--> imagine your Java Spring Boot application runs in one container and MySQL runs in another. Docker networking allows 
+						 your Spring Boot container to connect to the MySQL container.
+					--> Some imp docker network types:
+						--> Bridge Network: It is default network for standalone containers. In this, Containers are isolated from external 
+											networks unless connectivity is configured.
+						--> Host Network: In this, the container shares the host's network namespace.
+						--> Overlay Network: Allows services on different hosts to communicate over a shared virtual network.
+						--> None Network: Disables normal container networking. Useful when a container does not need network connectivity.
+						
+10. Volumes: Volumes are used for persistent storage in docker containers. By default, the docker containers are ephemeral means it will lost the data
+			 once the volume is destroyed or removed.
+
+11. To run the docker file. We've to install the terraform and aws using winget cmd. 
+				  
+Now, to remember the workflow of docker:
+
+1. Docker: Build the container/docker image.
+2. ECR: Stores the docker images.
+3. ECS: Run and manage the n number of containers.
+4. Fargate: Run containers without managing the underlying servers.
+
+Int Ques: - 
+
+1. Volume related -- how to optimize volume in docker?
+2. Run vs cmd vs entrypoint?
+3. How to optimize the docker?
+
+****KUBERNETES(K8s)****
+
+It is an open source container orchestration platform that automates deploying, scaling, networking, and managing containerized applications.
+
+For example, suppose you have a Spring Boot application packaged as a Docker container. Kubernetes can run multiple copies(replicas), restart failed 
+containers and scale the application when traffic increases. K8s handles the tasks such as:
+
+--> It helps manage apps across cluster of machines, ensuring HA and scalability and reliability.
+--> Deploying and managing containers.
+--> Load balance traffic.
+--> Managing n/w and storage.
+
+--> CNI: Container Network Interface - It is the n/w interface to provide connection or communication b/w the nods. e.g) Calico, Cillium etc.
+									   Calico, Cilium are the tools which can replace kube-proxy.
+
+--> CCM(Cloud Controller Manager): This will allow the communication b/w K8s and other AWS resources. Also, it manages the cloud-specific components,
+								   such as load balancers and storage volumes.
+--> Usually, the number of containers and nods during the setup of K8s will be decided by Architect.
+
+--> Namespace: It is used to logically separate and organize resources within the same K8s cluster. A channel of communication can be build to provide
+			   communication b/w the namespaces. If no any name is given then it will take the default namespace.
+			   A namespace is like the different rooms in a building. Where, each room can an contain its own applications, Pods, Services, and Deployments.
+			   In K8s, namespace can't be renamed once done the configuration. If we want to rename, we've to create another namespace and migrate the services.		
+			   Cmd to create a namespace: kubectl create ns namespace_name.
+			   Every application will create it's own Namespace. If we want to deploy the app using kubectl then first we've to create the namespace.
+			   
+--> Services: A service in K8s is a logical group of pods and provides a stable way to access them. Since the pods are temporary and their IP add.. can
+			  change, a service can provide a stable IP add., a DNS name. Types of services:
+				1. NodePort: In this we can define the port in range(30000 - 32767). In this the public IP of K8s will be exposed.
+				2. ClusterIP: It is the default one which is used to provide communication b/w microservices.
+				3. LoadBalancer: It Uses an external load balancer. It will automatically define the IP address.
+				4. External Name: If the traffic is getting served b/w service to service.
+
+**Components of K8s**
+
+1. Master Node: It manages the cluster and we can say like it is a control plane K8s. Here, the number of master node will be in odd no's always
+				because it will take the decision to manage the container. The brain of Kubernetes which makes decision on which cluster the app will run.
+
+2. Worker Node: These are the nodes on which EC2 instance will run. It will run your app.
+
+**Components of K8s(Master Node)**
+
+1. Kube-api: It is like a API gateway which provides the communication b/w Master & Worker node and there components. Also, 
+			 The main entry point for Kubernetes commands and API requests. All the components will communicate with Kube API server.
+
+2. etcd: It stores Kubernetes cluster configuration and state, including information about resources and desired workloads. It is a metadata of pods.
+		 It also stores data about the pods. If we want to get and access the backup of K8s, we can take it from etcd.
+
+3. Controller Manager: Runs controllers that continually work to make the actual cluster state match the desired state. 
+					   For example, it helps ensure a Deployment has the requested number of replicas.
+					 
+4. Scheduler: Selects a suitable worker node for a newly created Pod based on resources and scheduling rules.
+			  The scheduler will watch for the newly created pods that have no assigned nodes and will select the appropriate worker node for them.
+
+**Components of K8s(Worker Node)**
+
+1. Kubelet: It is an agent that runs on each worker node. Ensures the Pods assigned to the node are running as specified.
+2. Container runtime: Runs containers, commonly using "containerd" & "CRI-O" or another supported runtime.
+3. Kube-proxy: Helps provide service networking, depending on the cluster's networking setup. It is to manage the n/w of nodes.
+4. Pods: The smallest deployment unit that run your application and holds containers. A pod can contain multiple services or containers. A pod will be 
+		 having an IP. If we want to see the IP of each pod created annd running in our K8s, we can use below cmd. Pod will be created by controller manager.
+		 
+		--- kubectl -A -o wide 
+		 
+5. Container Run Interface: It will create the container by taking the image outside or from docker hub. In Simple, it is used to pull the docker image.
+
+Now, how to create a K8s and replica..
+
+--> kubectl create deployment nginx --image=nginx --replicas=2 
+
+Using the above line or cmd, we can create a K8 using nginx image with 2 replicas.
+
+--> Step-by-step flow(IMP):
+
+Developer builds and pushes a Docker image, deploys it using kubectl, the control plane schedules the Pod on a worker node, kubelet starts the 
+container, CNI configures networking, and Service/Ingress exposes the application to users.
+
+Remember these 6 words:
+Code → Image → Registry → Deploy → Run → Access
+
+****Important distinction****(IMP)
+
+- If a container crashes, the kubelet and container runtime may restart it according to the Pod's restart policy.
+- If a Pod disappears or is deleted, then replicaset controller can create a replacement Pod.
+- If a worker node fails, Kubernetes may reschedule managed Pods onto healthy nodes, depending on cluster health and configuration.
+
+Tags: Tags in AWS are key-value pairs used to identify, classify, organize, track, and manage AWS resources.
+For example, when you create EC2 instances for different environments, tags help you identify which instance belongs to development, testing, or production.
+we can add upto 50 tags in a K8s during creation.
+
+--> During the creation of K8s, make sure you selected the right version because after creation the version will not be rolled back. If you want to 
+roll back the version, you've to create a new cluster and transfer the traffic accordingly.
+
+--> Latest K8s version is 1.37 named as "Garhwal"(IMP)
+--> EKS Pod states:
+				1. Pending.
+				2. Running.
+				3. Succeded.
+				4. Failed.
+				5. Unknown.
+
+--> Kubectl get nodes - this is the cmd to check the status of nodes, Kubectl get pods will always work on master node not on worker node.
+--> 
+--> Affinity refers to the speed and Anti-Affinity refers to the HA of the pods. In affinity, pods will stay together in a node. In anti-affinity pods
+	will stay apart.
+--> Probes of K8s: (IMP)
+			1. Liveness: It checks whether the container is healthy or not?
+			2. Readiness: It checks whether the container is ready to serve the traffic or not?
+			3. Startup: It checks whether the application has started or not?
+			
+We can configure the probe of K8s in the configuration of K8s.
+
+--> To destory or terminate the K8s instance, cmd is: terraform destroy -auto-approve(IMP)
+--> The configuration of every app will be available in /etc/application/
+--> RTO(Recovery Time Objective): How quickly the service must be restored.
+--> RPO(Recovery Point Objective): How much data loss, mesaured in time, is acceptable.
+--> Cordon: It means no new pods can be scheduled. Simply, if a node is marked as Cordon then it will not take the new scheduling.
+			cmd to cordon the node is: kubectl cordon node_name
+--> Drain: It means to remove all the existing pods along with blocking the new pods.
+		   cmd to drain the node is: kubectl drain node_name
+--> Rolling Update Strategy: It is a K8s deployment strategy that updates an application gradually by replacing old Pods with new Pods, instead of 
+							 stopping all old Pods at once. Simply means to create a new pod and replace it before deleting the existing one.
+							 Here, two imp terms are:
+							 Max Surge: It means the maximum limit of nodes to get stretched or scaled.
+							 Max Unavailable: Maximum limit of unavailable nodes during the upgradation.
+
+--> PDB: Pod Disruption Budget -- It is not a AWS service but it limits how many replicas of an application can be voluntarily disrupted means can be
+							      deleted or removed at the same time.
+								  
+--> What is the use of Metric Server:(IMP) It is used for auto scaling in K8s. It is an add-on that collects CPU and memory usage metrics from nodes and pods.
+--> KEDA: (KS8 event driven Auto-Scaling): It is used to automatically scale K8s applications/pods based on events or metrics. It is mandatory and mostly used
+		  in kafka.
+--> The count of replicas of a pod will depend on HPA(Historical Pod Auto-Scaler). It can increase/decrease the count of replica based on requirement.
+--> Can we schedule or run a container into master node?(IMP) -- Yes, it is possible but not a best practice. We can add two rules to run on master node:
+			1. We can add toleration to the pod.
+			2. We can apply noSchedule rule.
+			
+--> Init Container(IMP): The purpose of init container is to setup and initialize or prepare the application. It runs before main app container. It will be
+				    used when your app needs the pre-requisite check.
+--> Sidecar Container(IMP): The purpose of sidecar container is to support the main application that is running. It runs alongside the application. These are
+					   mainly used for logging and monitoring. It will be used when your app needs any service or helper process to run alon with the main app.
+
+--> Taint: It is like a tag which we can apply on node.
+--> Toleration: It is like a tag which we can apply on pods.
+e.g) Suppose a node is applied with a taint as memory, then a pods which is configured to tolerate the memory node will goto the node which is tagged as memory taint.
+
+
+****HELM CHART****(IMP)
+
+Helm is a package manager for K8s. While, the Helm Chart is a package container containing yaml files, configuration files which are needed to deploy
+an application into a K8s cluster.
+
+For e.g) Suppose, we're having three cluster or nodes in which we want to deploy the application which is following the same deployment configurations,
+now we've to write configuration file for each and every node or cluster. But, using the Helm Chart we can use the same file for all three nodes.
+
+Like this we can increase the re-usability by packaging the configuration files. So, we don't need to maintain in every cluster or node.
+
+To remember, as we have npm for node.js, maven or gradle for java, similarly we've helm for K8s.
+
+***Key Components of Helm***
+
+1. Helm Chart: It is a pre-defined package or collection of files including required dependencies and configurations.
+2. Helm Client: It is the cmd-line tool using which we can manage charts and release applications.
+3. Helm Repository: It is a location where helm charts are stored and shared, similar to a software or git repo.
+4. Helm Release: It is a specific instance of a Helm chart deployed to a K8s cluster when we install a chart, it creates a release.					  
+
+**Flow of Helm: How helm works?
+
+1. Create the Chart: At first, we'll create the helm chart containing the several configuration files like deployment, services, ConfigMaps ect with 
+"Chart.yaml" as the primary metadata file.
+
+2. Install the chart: Here, it will fetch all the vlaues and config present in "Chart.yaml" and will install and send the chart to the K8s cluster.
+
+3. Upgrading and managing Releases: Helms allows we to upgrade the application to the latest version from the official helm website. We can also use
+the below cmds to install it on various systems:
+
+For linux: curl "download link from helm official website"
+For windows: download directly from the releases from official website.
+To check helm version: helm version
+To check on which cluster you're working: kubectx
+To switch the cluster: kubectx cluster_name
+To list out the repo in helm: helm repo list
+
+--> Bitnami: It provides packaged applications and deployment solutions that make it easier to install and run software. In the Kubernetes world, 
+Bitnami is especially known for ready-to-use Helm charts and container images for applications such as PostgreSQL, Redis, NGINX, and WordPress.
+
+--> CRD: "Custom Resource Defintion": This we can use to customize any resource definition as per own requirement and labelling.
+		In simple, CRD will teach the K8s about the new resource type.
+		
+--> _helpers.tpl:- It is a resuable function library for helm templates.
+
+****AWS ArgoCd****
+
+ArgoCD is a GitOps based continuous delivery tool in AWS which we can use to deploy and manage the apps in K8s. In AWS, ArgoCD is commonly 
+installed in EKS cluster.
+						ArgoCD will monitor the Git repo continuously and it will sync the changes b/w git repo and the cluster state. 
+As soon as the change will happen in git repo, it will sync the EKS cluster state to that change automatically.  
+
+Q) We call ArgoCD as GitOps?? -- Because here, the git will act as a "source of truth". Below are the some imp cmds used in ArgoCD:
+
+1. kubectl get pods -n argocd ---> This cmd will check and list the ArgoCD pods.
+2. argocd app list ---> This cmd will list out the argocd apps.
+3. argocd app get app_name ---> This cmd will tell the status of argocd application.
+4. argocd app sync app_name ---> This cmd will sync the EKS cluster with git repo changes.
+5. argocd app rollback app_name 1 ---> This cmd will rollback the CD to previous version.

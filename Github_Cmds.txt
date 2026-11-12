@@ -1,0 +1,79 @@
+***Github: Practical Guide for Beginners***
+
+--> Git is a version control tool where github is a web platform which provides and hosts the web repositories to provide push and pull requests for 
+your projects, directories and files etc.
+
+***POINTS TO REMEMBER***
+--> Staged Changes: The changes or modification you've selected for the next commit.
+--> Unstaged Changes: The changes or modification that you've not selected for the next commit.
+--> GitBash: This is like a console/terminal which we can use to execute the git cmds.
+--> We can move the unstaged changes to staged using the "git add ." cmd.
+--> The commit cmd will never automatically upload the code to your repo until you execute the git push cmd.
+--> Firt, Fetch and pull first before every commit and push. (FP-CP).
+--> Never push or commit directly to the main or master branch. Always, create a feature branch then create a "pull & merge" request.
+--> Hotfix: Hotfix is a critical fix which we do in PROD using main branch generally. The best practice is to create a feature branch from 
+main and do the fix and commit it again directly into the main branch.
+--> Cherry Pick: Cherry pick refers to the commit pull. Like, we will not pull the whole branch changes. We'll just pick the specific 
+commit from a branch. It is useful when we need one fix not the whole branch or pull.
+--> Trunk-based development: This is the development practice where we'll do push and commit directly into the main branch. It is useful 
+for low impact and small projects.
+--> Hard reset: This will delete the commits and changes permanently as well. Use it carefully as it is destructive. (git reset --hard HEAD-1).
+--> Soft reset: This will undo/delete the commits and will keep the staged changes. (git reset --soft HEAD-1).
+--> Fork: this will change the ownership of the branch.
+
+--> Now, when we're setting up the gitbash for the first time in our local, we've to configure the username and email like below, these 
+configuration identifies the author of the commit and changes:
+
+----> git config --global user.name "Your_Name"
+----> git config --global user.email "email_Id"
+
+Now, to check the configuration we can use the  below cmd:
+
+--> git config --global --list
+ 
+--> Below are the some imp cmds which we need to learn for our daily BAU:
+
+1. git init - This cmd is simply used to initialize the git in the folder in our local that means the folder or path from where we will create a push
+request to repositories on github.
+2. git status - This cmd is used to check the status of staged changes or the modified files in our local. (The files which we've modified) 
+3. git add . - This cmd is used to add all the staged changes from the current directory in our local. 
+4. git fetch origin - This cmds can be used to fetch all the latest updates from the github remote repo or branch.
+5. git push - This cmd can be used to push the staged changes to the branch. 
+6. git clone "git-url"- This cmd can be used to clone(make a copy) the remote branch into our local means simply to download the branch files and folders 
+into the local.
+7. git pull - This cmd can be used to pull and integrate the latest changes from a remote branch. 
+8. git commit -m "commit_message" - This can be used to provide the commit message for committing the changes to the remote branch.(This cmd will not
+upload the code or files to the branch).
+9. git add file_name - This cmd we can use to add any specific file to the staged changes.
+10. git diff - This cmd wil show the unstaged changes. (To View the unstaged changes).
+11. git diff --staged - This cmd can be used to view the staged changes.
+12. git log --oneline - This cmd can be used to check and list the recent commits.
+13. git branch - It will list out the local branch. 
+14. git branch -a - It will list out the local branch as well as the remote tracking branch.
+15. git switch main - It can be used to switch to the main branch.
+16. git branch -m "new_name" - This cmd can be used to rename the current branch.
+17. git stash - This cmd can be used to save the unstaged changes temporarily.
+18. git revert COMMIT_ID - This cmd can be used to undo the commit with a new commit.
+19. git switch -c "branch_name": this cmd will create a new branch and will switch to it.(Similar to git checkout -b branch_name).
+20. git switch branch_name - It is to switch the branch.
+21. git fork -- This will create a replica of the someone's else branch to yours over git not local.
+22. git restore -- This cmd will restore the changes at your local.
+
+***Sequence of the Commands for Daily Use***
+
+1. First switch to main or master branch. - git switch main/master - Why? to switch to main or master branch
+2. Now, pull the latest changes from main or master - git pull origin main - Why? to fetch and pull the latest changes from main branch
+3. Now, switch again to the feature branch(the branch where we will commit and push) - git switch "branch_name" - Why? it is recommended because
+we shouldn't push or commit directly to the main or master branch, instead we should practice the feature or develop branch.
+
+4. Now, after modifications or doing the changes, check the status of staged changes. - git status - Why? it is always good practicew to check and
+verify the staged changes before committing or pushing the code. 
+5. Now, after checking the status, we can provide a commit message - git commit -m "message" - Why? Just to provide the commit message to identify the 
+commit uniquely.
+6. Now, the last will be push - git push -u origin - Why? - To push the staged changes to the branch in github.
+
+
+
+
+
+
