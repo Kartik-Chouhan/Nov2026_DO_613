@@ -1,0 +1,4 @@
+3 hours -- done morning class
+1 hour -- Done Day14 coding practice L2
+1 hour -- revision of K8s, EKS, Affinity, StatefulSet and so on
+
