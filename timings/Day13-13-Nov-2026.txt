@@ -1,0 +1,6 @@
+3 hours - done morning class
+2 hour - revision and practice of morning class, troubleshooting terraform to create EKS cluster
+45 min -- coding practice L2
+45 min -- project continue for AWS practical learning
+10 min -- Intro practice
+30 min -- evening class
