@@ -1,0 +1,121 @@
+Day14 - K8s advanced concepts & multi environment deployments
+
+--> Ansible - Setup Nginx with reverse proxy
+
+```yaml
+- name: setup/install Nginx with reverse proxy
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install nginx
+	  yum: 
+		name: nginx
+		state: present
+	
+	- name: configure nginx as reverse proxy
+	  template: 
+		src: reverse-proxy.conf.j2
+		dest: /etc/nginx/config/reverse-proxy.conf
+	  notify: Restart Nginx
+		
+	- name: Restart Nginx service:
+	  service:
+		name: nginx
+		state: restarted
+		enabled: yes 
+		
+--> Terraform - create S3 buckets with versioning and logging
+
+resource "aws_s3_bucket" "demo_bucket" { ## Bukcet names must be globally unique
+  bucket = "demo_bucket"
+  versioning {
+	enabled = true
+  }
+  
+  logging {
+	target_bucket = "demo-log--bucket"
+	target_prefix = "logs/"
+  }
+}
+
+--> K8s -- Ingress with Nginx controller 
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress ## This should be case sensitive not ingress etc.
+metadata:
+	name: demo-ingress
+	annotations:
+		nginx.ingress.kubernetes.io/rewrite-target: /
+		
+spec: 
+	rules:
+		- host: kartik.local
+		  http: 
+			paths: 
+			  - path: /
+			    pathType: Prefix
+				backend: 
+					service:
+						name: demo-service
+						port: 
+							number: 80
+
+--> Jenkinsfile -- Build, test, and deploy with stages
+
+pipeline {
+	agent any
+	stages {
+		stage('Build'){
+			steps {
+				echo "Builduing docker image..."
+				docker.build('demo-web-app:latest')
+			}
+		}
+		stage('Test') {
+			steps {
+				echo "Running Tests......"
+			}
+		}
+		stage('Deploy to K8s') {
+			steps {
+				script {
+					sh 'kubectl apply -f kubernetes/deployment.yaml'
+				}
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Multi stage Deployment with Helm
+
+stages:
+	- build
+	- push
+	- deploy
+	
+build: 
+	stage: build
+	script:
+	  - docker build -t demo-web-app .
+	
+	push: 
+	  stage: push
+	  script:
+		- docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+		- docker push demo-web-app
+		
+	deploy:
+		stage: deploy
+		script:
+			- helm repo add pathnex https://charts.pathnex.com
+			- helm repo update
+			- helm upgrade --install pathnex-nginx pathnex/nginx-ingress
+		
+--> Docker 
+
+#CMD Vs ENTRYPOINT
+
+FROM ubuntu
+ENTRYPOINT ["echo"]
+CMD ["Hello Kartik.."]
+
