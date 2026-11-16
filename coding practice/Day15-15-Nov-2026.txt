@@ -1,0 +1,114 @@
+Day15 - Automation with terraform, ansible and CI/CD pipelines
+
+--> Ansible - Deploy a web application to muliple hosts
+
+- name: Deploy web app to multiple hosts
+  hosts: all
+  become: yes
+  tasks:
+    - name: copy web app files
+	  copy: 
+		src: /path/to/web/app/
+		dest: /var/www/html/
+	
+	- name: start web app service
+	  service: 
+		name: apache2
+		state: started
+		enabled: yes 
+		
+--> Terraform - create EC2 with ALB (Application load balancer)
+
+resource "aws_lb" "demo_lb" { ## Bukcet names must be globally unique
+  name = "demo_lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.allow_ssh_http.id]
+  subnets = [aws_subnet.public.id]
+}
+
+resource "aws_instance" "demo_ec2" {
+	ami = "ami-0abcd1234abcd1234"
+	instance_type = "t2.micro"
+	security_groups = [aws_security_group.allow_ssh_http.name]
+	
+	tags = {
+		Name = "demo-EC2"
+	}
+}
+
+--> K8s -- Helm chart for Redis with Persistence
+
+helm install demo-redis bitnami/redis --set persistence.enabled=true --set persistence.size=8Gi
+
+--> Jenkinsfile -- Multi-Environment Deployment
+
+pipeline {
+	agent any
+	environment {
+		IMAGE_NAME = 'demo-web-app'
+		DEPLOY_ENV = 'production'
+	}
+	stages {
+		stage('Build'){
+			steps {
+				echo "Builduing docker image..."
+				docker.build("${env.IMAGE_NAME}")
+			}
+		}
+		stage('Test') {
+			steps {
+				echo "Running Tests......"
+			}
+		}
+		stage('Deploy to K8s') {
+			steps {
+				script {
+				if(env.DEPLOY_ENV == 'production'){
+					sh 'kubectl apply -f kubernetes/prod-deployment.yaml'
+				}else {
+					sh 'kubectl apply -f kubernetes/dev-deployment.yaml'
+					}
+				}
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Environment specific deployments
+
+stages:
+	- build
+	- push
+	- deploy
+	
+build: 
+	stage: build
+	script:
+	  - docker build -t demo-web-app .
+	
+	push: 
+	  stage: push
+	  script:
+		- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASS"
+		- docker push demo-web-app
+		
+	deploy:
+		stage: deploy
+		script:
+		  - |
+			if ["$CI_COMMIT_REF_NAME" == 'main']; then
+				kubectl apply -f kubernetes/prod-deployment.yaml
+			else 
+				kubectl apply -f kubernetes/dev-deployment.yaml
+			fi
+
+--> Docker 
+
+## Multi RUN Commands
+
+FROM ubuntu
+RUN apt update && \
+	apt install curl -y && \
+	apt install vim -y
+CMD ["echo", "Hello Kartik..."]
