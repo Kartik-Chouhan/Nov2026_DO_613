@@ -1,0 +1,160 @@
+Day 16 — Advanced cloudFormation & Multi-Region Deployments
+
+--> Ansible -- Create and start EC2 instance
+
+- name: create EC2 instance
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Launch EC2 instance in us-east-1
+	  ec2_instance:
+		name: day16-ec2-us-east-1
+		key_name: day16-ec2-east-key
+		region: us-east-1
+		instance_type: t2.micro
+		image: ami_0abcd1234abcd1234
+		wait: yes
+	
+	- name: launch EC2 instance in us-west-1
+	  ec2_instance:
+		name: day16-ec2-us-west-1
+		key_name: day16-ec2-west-key
+		region: us-west-1
+		instance_type: t2.micro
+		image: ami_0abcd1234abcd1234
+		wait: yes
+		
+--> Terraform -- Multi-Region VPC with EC2
+
+resource "aws_vpc" "us_east_vpc" {
+	cidr_block = "10.0.0.0/16"
+	region = "us-east-1"
+}
+
+resource "aws_vpc" "us_west_vpc" {
+	cidr_block = "10.1.0.0/16"
+	region = "us-west-1"
+}
+
+resource "aws_instance" "day16_ec2_us_east" {
+	ami = "ami-0abcd1234abcd1234"
+	instance_type = "t2.micro"
+	region = "us-east-1"
+}
+
+resource "aws_instance" "day16_ec2_us_west" {
+	ami = "ami-0abcd12340abncd1234"
+	instance_type = "t2.micro"
+	region = "us-west-1"
+}
+
+--> K8s -- Multi-Cluster Deployment with federation
+
+apiVersion: app/v1
+kind: Deployment
+metadata:
+	name: day_16_ec2_deployment
+	labels:
+		app: demo-app
+spec:
+	replicas: 2
+	selector:
+		matchLabels:
+			app: demo-app
+	template:
+		metadata:
+			labels:
+				app: demo-app
+		spec:
+			containers:
+				- name: nginx
+				  image: nginx
+				  ports:	
+					- containerPort: 80
+
+---
+
+apiVersion: v1
+kind: service
+metadata:
+	name: demo-service
+spec:
+	selector:
+		app: demo-app
+	ports:
+	  - protocol: TCP
+	    port: 80
+
+--> Jenkinsfile -- Deploy to Multi-Cluster environments
+
+pipeline {
+	agent any {
+		stages {
+			stage('Build') {
+				steps{
+					echo "Building docker image...."
+					docker.build('demo-web-app')
+				}
+			}
+			stage('Test') {
+				steps {
+					echo "Testing cases...."
+				}
+			}
+			stage('Deploy') {
+				steps {
+					script {
+						if(env.CLUSTER = 'us-east-1') {
+							sh 'kubectl --context=us-east apply -f kubernetes/deployment.yaml'
+						} else {
+							sh 'kubectl --context=us-west apply -f kubernetes/deployment.yaml'
+					}
+				}				
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Multi-Region deployment with K8s
+
+stages:
+	- build
+	- push
+	- deploy
+	
+build:
+	stage: build
+	script: 
+		- docker build -t demo-web-app
+		
+push:
+	stage: push
+	script: 
+		- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASS"
+		- docker push demo-web-app
+		
+deploy:
+	stage: deploy
+	script:
+	  - |
+	    if ["$CI_COMMIT_REF_NAME" == "main"]; then
+			kubectl --context=us-east apply -f kubernetes/prod_deployment.yaml
+		else 
+			kubectl --context=us-west apply -f kubernetes/dev_deployment.yaml
+		fi
+		
+--> Docker -- 
+
+##Shell script Execution
+# !/bin/bash
+echo "Hello Kartik.."
+
+#Docker File
+
+FROM ubuntu
+
+WORKDIR /opt/user/scripts
+COPT start.sh /opt/user/scripts/
+RUN chmod +x /opt/user/scripts/start.sh
+CMD ["opt/user/scripts/start.sh"]
