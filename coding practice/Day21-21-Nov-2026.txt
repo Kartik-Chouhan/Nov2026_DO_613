@@ -1,0 +1,135 @@
+Day 21 -- Disaster recovery and backup strategies
+
+## Disaster recovery means restoring applications and infrastructure after a major failure.
+
+--> Ansible - Backup and restore files
+
+- name: Backup and restore files
+
+  hosts: all
+  become: yes
+  
+  tasks:
+	- name: Create backup of /etc directory
+	  ansible.builtin.cmd
+	  cmd: tar -czvf /tmp/etc-backup.tar.gz -C /etc   #Creates a compressed .tar.gz archive.
+	  creates: /tmp/etc-backup.tar.gz      # creates skips the task if the specified file already exists.
+	
+	- name: Copy backup to remote server
+	  copy:
+		src: /tmp/etc-backup.tar.gz
+		dest: /tmp/etc-backup.tar.gz
+	  
+	- name: Restore backup from remote server
+	  ansible.builtin.cmd
+	  cmd: tar -xzvf /tmp.etc-backup.tar.gz -C /    #Extracts a compressed archive
+	  
+--> Terraform -- Create S3 bucket with cross-region replication
+
+resource "aws_s3_bucket" "day21_demo_bucket" {
+	bucket = "day21_demo_bucket"
+	region = "us-east-1"
+	
+	versioning {
+		enabled = true
+	}
+}
+
+resource "aws_s3_bucket" "day21_demo_backup_bucket" {
+	bucket = "day21_demo_backup_bucket"
+	region = "eu-west-1"
+	
+	versioning {
+		enabled = true
+	}
+}
+
+resource "aws_s3_bucket_object" "demo_backup_file" {
+	bucket 		= aws_s3_bucket.demo_bucket.bucket
+	key 		= "backup.tar.gz"
+	source 		= "demo-backup.tar.gz"
+}
+
+--> K8s -- Disaster recovery with persistent volumes
+
+apiVersion: apps/v1
+kind: SatefulSet
+metadata:
+	name: demo-statefulSet
+spec:
+	serviceName: "demo-service"
+	replicas: 3
+	selector:
+		matchLabels: 
+			app: demo_app
+	template:
+		metadata:
+			labels:
+				app: demo_app
+	spec:
+		containers:
+			- name: nginx
+			  image: nginx
+			  volumeMounts:
+				-	mountPath: /usr/share/nginx/html
+					name: web-content
+	volumeClaimTemplates:
+		- metadata:
+			name: web-content
+		  spec:
+			accessModes: [ "ReadWriteOnce" ]
+			resources:
+				requests:
+					storage: 5Gi
+					
+--> Jenkinsfile -- Backup strategy for Jenkinss workspace
+
+pipeline {
+	agent any
+	stages {
+		stage('Backup') {
+			steps{
+				echo "Backing up Jenkins workspace..."
+				sh tar -czvf /tmp/jenkins-backup.tar.gz \
+				- C "${WORKSPACE}" .
+			}
+		}
+		stage('Restore') {
+			steps {
+				echo 'Restoring Jenkins workspace...'
+				sh tar -xzvf /tmp/jenkins-backup.tar.gz \
+				- C "${WORKSPACE}"
+				}				
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Backup and Restore deployment files
+
+stages:
+	- backup
+	- restore
+	
+backup:
+	stage: backup
+	script: 
+	 - mkdir -p backup
+	 - tar -czvf /tmp/backup.tar.gz kubernetes/deployment.yaml
+
+restore:
+	stage: restore
+	script: 
+		- tar -xzvf /tmp/backup.tar.gz -C kubernetes/
+		
+--> Docker -- 
+
+# Docker Compose
+
+version: '3'
+services: 
+	web:
+		image: nginx
+		container_name: demo-nginx
+		ports:
+			- "80:80"

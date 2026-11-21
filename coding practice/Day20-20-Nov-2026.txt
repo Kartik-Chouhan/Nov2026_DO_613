@@ -1,0 +1,120 @@
+Day 20 -- Security, Hardening, and compliance
+
+--> Ansible - Configure firewall with iptables
+
+- name: Configure firewall with iptables      
+  hosts: all
+  become: yes
+  
+  tasks:
+	- name: Allow established connections  ## This is to allow the connections and loopback traffic.
+	  ansible.builtin.cmd
+	  cmd: iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+	
+	- name: Allow loopback traffic
+	  ansible.builtin.cmd
+	  cmd: iptables -A INPUT -i lo -j ACCEPT
+	  
+	- name: Allow SSH and HTTP traffic
+	  ansible.builtin.cmd
+	  cmd: iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+	  cmd: iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+	
+	- name: Set default INPUT policy to DROP
+	  ansible.builtin.cmd
+		cmd: iptables -P INPUT DROP
+	  
+	- name: Save iptables configuration
+	  cmd: service iptables save
+	  
+--> Terraform -- Configure security groups for EC2
+
+resource "aws_security_group" "day20_demo_sg" {
+	name_prefix 	  = "day20-demo-sg"    
+	description 	  = "Allow SSH and HTTP"
+
+	ingress {
+		from_port 	= 22
+		to_port 	= 22
+		protocol	= "tcp"
+		cidr_blocks = ["YOUR_IP/0"] ## it shoule be my_ip instead of everyone
+	}
+
+	ingress {
+		from_port	= 80
+		to_port		= 80
+		protocol	= "tcp"
+		cidr_blocks	= ["0.0.0.0/0"]
+	}
+}
+--> K8s -- RBAC configuration for access control
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+	name: demo-cluster-admin
+subjects:
+	- kind: User           ## It should be User not user
+	  name: demo-user
+	  apiGroup: rbac.authorization.k8s.io
+roleRef:
+	- kind: ClusterRole
+	  name: cluster-admin
+	  apiGroup: rbac.authorization.k8s.io
+
+--> Jenkinsfile -- Secure credentials management
+
+pipeline {
+	agent any
+	environment {
+		REGISTRY_PASSWORD = credentials('docker-registry-password')
+	}
+	stages {
+		stage('Build') {
+			steps{
+				echo "Building docker image...."
+				docker.build("demo-web-app")
+			}
+		}
+		stage('Push') {
+			steps {
+				script {
+					docker.withRegistry('http://docker.io', 'docker-credentials') 
+					docker.image('demo-web-app').push('latest')
+				}				
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Secure deployment with secrets management
+
+stages:
+	- build
+	- push
+	- deploy
+	
+build:
+	stage: build
+	script: 
+		- docker build -t demo-web-app .
+		
+push:
+	stage: push
+	script: 
+		- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASS"
+		- docker push demo-web-app
+		
+deploy:
+	stage: deploy
+	script:
+		 - kubectl apply -f kubernetes/deployment.yaml
+		 - kubectl get pods --watch	
+		
+--> Docker -- 
+
+# Docker Networking
+
+docker network create demo-network
+docker run -dit --name c1 --network demo-network ubuntu
+docker run -dit --name c2 --network demo-network ubuntu
