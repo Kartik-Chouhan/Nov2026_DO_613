@@ -1,17 +1,18 @@
 Day 25 -- Continuous Monitoring and alerts
 
---> Ansible - Setup prometheus node exporter for monitoring
+--> Ansible - Setup prometheus node exporter for monitoring  # Here, prometheus and grafana are the continuous monitoring tools.
 
 ```yaml
 - name: Setup prometheus Node exporter
   hosts: all
   become: yes
   tasks:
-	- name: Install prometheus node exporter
+	- name: Install prometheus node exporter   # Node exporter collects metrics such as CPU utilization, memory usage, disk usage, network stats
 	  yum: 
 		name: prometheus-node-exporter
 		state: present
-    - name: Start prometheus node exporter service
+    
+	- name: Start prometheus node exporter service
 	  service:
 		name: prometheus-node-exporter
 		state: started
@@ -25,18 +26,18 @@ resource "aws_cloudwatch_metric_alarm" "demo_cpu_alarm" {
 	evaluation_periods 		= 1
 	metric_name 			= "CPUUtilization"
 	namespace 				= "AWS/EC2"
-	period					= "60"
+	period					= 60
 	statistic				= "Average"
-	threshold				= "80"
+	threshold				= 80
 	
 	dimensions = {
-		IntanceId 	=	aws_instance.demo_ec2.id
+		InstanceId 	=	aws_instance.demo_ec2.id
 	}
 	
 	alarm_actions 	=	[aws_sns_topic.demo_alerts.arn]
 }
 
-resource "aws_sns_topic" "demo_alerts" {
+resource "aws_sns_topic" "demo_alerts" {   # Here, SNS(Simple Notification Service) provides the alarm.
 	name 	=	"demo-alerts"
 }
 
@@ -58,10 +59,23 @@ spec:
 		spec:
 			containers:
 				- name: prometheus
-				  image: prom/prometheus:latest
+				  image: prom/prometheus:v3.8.0
 				  ports:
 					- containerPort: 9090
+					
+---  #Above, we've just deployed the prometheus, to start with prometheus we've to start the service as well.
 
+apiVersion: v1
+kind: service
+metadata:
+	name: prometheus
+spec:
+	selector:
+		app: prometheus
+	ports:
+	  - port: 9090
+		targetPort: 9090
+		
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -79,9 +93,21 @@ spec:
 		spec:
 			containers:
 				- name: grafana
-				  image: grafana/grafana:latest
+				  image: grafana/grafana:12.3.0
 				  ports:
 					- containerPort: 3000
+					
+---
+apiVersion: v1
+kind: Service
+metadata:
+	name: grafana
+spec:
+	selector:
+		app: grafana
+	ports:
+	  - port: 3000
+		targetPort: 3000
 	
 --> Jenkinsfile -- Continuous Monitoring and alerts in CI pipeline
 
@@ -92,7 +118,7 @@ pipeline {
 			steps{
 				script {
 					echo 'Triggering CloudWatch alarms if CPU exceeds 80%'
-					sh 'aws cloudwatch put-metric-data --namespace "AWS/EC2" -- metric-name "CPUUtilization --value 90'
+					sh 'aws cloudwatch put-metric-data --namespace "AWS/EC2" --metric-name "CPUUtilization --value 90'
 				}
 			}
 		}
