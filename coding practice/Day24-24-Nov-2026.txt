@@ -1,0 +1,93 @@
+Day 24 -- Advanced terraform modules and CI/CD pipeline scaling
+
+--> Ansible - Deploy docker containers with K8s using helm
+
+- name: Deploy docker K8s with helm
+  hosts: localhost
+  tasks:
+	- name: Install Helm
+	  ansible.builtin.command: 
+	  cmd: > curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+    - name: Deploy microservices with Helm
+      command: helm install demo-app ./microservice-chart
+	  
+--> Terraform -- Multi-Module infrastructure with Outputs
+
+module "demo_vpc" {
+	source 		= "./vpc"
+}
+
+module "demo_instance" {
+	source 		= "./instance"
+	vpc_id 		= module.demo_vpc.vpc_id
+}
+
+output "instance_id" {
+	value		= module.demo_instance.instance_id
+}
+ 
+--> K8s -- Helm-based Auto-Scaling Deployments
+
+apiVersion: apps/v1
+kind: deployment
+metadata:
+	name: demo-web-app
+spec:
+	replicas: 3
+	selector:
+		matchLabels:
+			app: demo-web-app
+	template:
+		metadata:
+			labels:
+				app: demo-web-app
+		spec:
+			containers:
+				- name: nginx
+				  image: nginx
+				  ports:
+					- containerPort: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+	name: demo-web-app-hpa
+spec:
+	scaleTargetRef:
+		apiVersion: apps/v1
+		kind: deployment
+		name: demo-web-app
+	minReplicas: 2
+	maxReplicas: 10
+	targetCPUUtilizationPercentage: 80
+	
+--> Jenkinsfile -- Scaling CI/CD Pipeline
+
+pipeline {
+	agent any
+	stages {
+		stage('Scale Up') {
+			steps{
+				echo "Scaling up jenkins pipeline agents for heavy workloads..."
+			}
+		}
+		stage('Build') {
+			steps {
+				echo "Building Project...."				
+			}
+		}
+		stage('Deploy') {
+			steps {
+				echo "Deploying project..."
+			}
+		}
+	}
+}
+
+--> Docker
+
+# Healthcheck
+
+FROM nginx
+HEALTHCHECK CMD curl --fail http://localhost || exit 1
