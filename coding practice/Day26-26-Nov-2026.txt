@@ -1,0 +1,104 @@
+Day 26 -- Security Best practices
+
+--> Ansible - Implementing SSH key based authentication
+
+# SSH key-based authentication allows servers to communicate securely without repeatedly entering passwords.
+
+- name: Implement SSH key based authentication
+  hosts: all
+  become: yes
+  tasks:
+	- name: Generate SSH key pair
+		command: ssh-keygen -t rsa -b 2048 -f /home/user/.ssh/id_rsa -N "demo_key.pem"
+		
+	- name: Add SSH public key to authorized_keys   
+	  authorized_key:
+		user: user
+		state: present
+		key: "{{ lookup('file', '/home/user/.ssh/id_rsa.pub') }}"    # Here, private key should remain secure and should never be copied to authorized_keys.
+     
+--> Terraform -- Enabling VPC flow logs for security
+
+resource "aws_vpc_flow_log" "demo_flow_log" {
+	log_group_name 				= "demo-flow-logs"
+	vpc_id						= aws_vpc.demo_vpc.id
+	traffic_type				= "ALL"
+	log_destination_type		= "cloud-watch-logs"
+}
+
+resource "aws_cloudwatch_log_group" "demo_flow_log_group" {
+	name = "demo-flow-logs"
+}
+
+--> K8s -- Network Policies for security
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+	name: demo-web-policy
+spec:
+	podSelector:
+		matchLabels:
+			app: demo-web-app
+	policyTypes:
+		- Ingress
+		- Egress
+	
+	ingress:    #Controls incoming traffic.
+		- from: 
+			- podSelector:
+				matchLabels:
+					app: demo-api
+	
+	egress: 	# Controls outgoing traffic.
+		- to:
+			- podSelector:
+				matchLabels:
+					app: demo-database
+	
+--> Jenkinsfile -- Secure the pipeline with secrets
+
+pipeline {
+	agent any
+	environment {
+		AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+		AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+	}
+	stages {
+		stage('Build') {
+			steps{
+				echo 'Building Docker Image...'
+				docker.build('demo-web-app')
+			}
+		}
+		stage('Deploy') {
+			steps {
+				echo "Deploying to AWS EC2...."
+				sh 'aws ec2 run-instances --image-id ami-0abcd1234 --count 1 --instance-type t2.micro'
+			}
+		}
+	}
+}
+
+--> Gitlab CI/CD -- Use Gitlab Secrets for Secure Deployment
+
+stages:
+	- build
+	- deploy
+
+build:
+	stage: build
+	script:
+		- docker build -t demo-web-app .
+deploy:
+	stage: deploy
+	script:
+		- echo "Deploying with Secure credentials"
+		- aws ec2 run-instances --image-id ami=0abcd1234 --count 1 --instance-type t2.micro --access-key $AWS_ACCESS_KEY --secret-key $AWS_SECRET_KEY
+
+--> Docker
+
+# Docker Logs & Inspect
+
+docker logs demo-nginx
+docker inspect demo-nginx

@@ -1,0 +1,5 @@
+3 hours -- morning class, related to SSL/TLS certificates
+1 hour -- coding practice
+1 hour -- done revision of morning class
+30 min -- done eve class
+1.5 hours -- done project continuation for self learning and handson on AWS practices
